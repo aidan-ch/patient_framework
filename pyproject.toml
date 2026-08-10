@@ -8,11 +8,9 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
+    "mypy>=2.3.0",
     "requests>=2.34.2",
 ]
-
-[project.scripts]
-patient-framework = "patient_framework:main"
 
 [build-system]
 requires = ["uv_build>=0.12.1,<0.13.0"]
@@ -21,4 +19,8 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
+    "pytest-mock>=3.15.1",
 ]
+
+[tool.pytest.ini_options]
+pythonpath=["src"]

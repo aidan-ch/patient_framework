@@ -30,10 +30,6 @@ class Source:
                 raise ValueError('Longitudinal sources should not have an event field')
 
 
-
-
-
-
 # per-field flags to decide what value to take from patient if there are many events with data
 class VisitPolicy(Enum):
     """For patients that will have many events with many of those events having the same data for a given field, the visit policy of that field determines which event the data will be extracted from.

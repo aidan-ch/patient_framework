@@ -1,33 +1,35 @@
+"""Default parsers when none is passed """
+
 from datetime import datetime
 
-_TRUTHY = {"1", "true", "yes", "y"}
-"""All strings in here are lowercased; use .lower() before comparison"""
+_TRUTHY = {"1", "true","t", "yes", "y"}
 
-_FALSY = {"0", "false", "no", "n"}
+_FALSY = {"0", "false","f", "not","no", "n",""}
 
-def _coerce_date(value, date_format) -> datetime.date:
+def _coerce_date(value, format_str) -> datetime:
     """:param value: A string representing the date to parse
-    :param date_format: expects a string like "%Y-%m-%d
+    :param format_str: expects a string like "%Y-%m-%d"
     :return: Date object
     """
     try:
-        out = datetime.strptime(value, date_format).date()
+        out = datetime.strptime(value, format_str)
     except ValueError as e:
-        raise TypeError(f"Invalid date string or string does not match format: {e}")
+        raise TypeError(f"Date string does not match format, or format is invalid: {e}")
 
     return out
 
-def _coerce_bool(value) -> bool:
-    if isinstance(value, bool):
-        return value
-    if isinstance(value, int):
-        return bool(value)
-    if isinstance(value, str):
-        value = value.strip().lower()
-        if value in _TRUTHY:
+def _coerce_bool(value:bool|int|str) -> bool:
+    """:param value: If value is a str object, must be one of _TRUTHY, or _FALSY
+    to be parsed to a boolean, else will raise TypeError."""
+    if isinstance(value,str):
+        if value.lower() in _TRUTHY:
             return True
-        if value in _FALSY:
+        elif value.lower() in _FALSY:
             return False
+    elif isinstance(value, bool):
+        return value
+    elif isinstance(value, int):
+        return bool(value)
 
     raise TypeError(f"Cannot coerce {value!r} to a boolean")
 
@@ -42,7 +44,6 @@ def _coerce_str(value):
 def _coerce_int(value):
     if isinstance(value,int):
         return value
-
     try:
         return int(value)
     except (TypeError, ValueError) as e:
