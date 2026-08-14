@@ -3,12 +3,13 @@ from dataclasses import dataclass
 from enum import Enum
 
 
+__all__ = ['Source', 'VisitPolicy','DEFAULT_VISIT_POLICY']
+
 @dataclass(frozen=True)
 class Source:
     name : str  # name of data source (e.g. Google)
     id_field_name : str  # identify row(s) of data as belonging to one entity
-    event_field_name : str | None # differentiate rows with same id_field_name
-    is_longitudinal:bool
+    _event_field_name : str | None # differentiate rows with same id_field_name
     path: Path | None # will be ignored if this source is used for an ApiDataset
     empty_values : frozenset[str|None] = frozenset({None})
     """When data is ingested, what forms of data should be concerned empty?
@@ -28,8 +29,14 @@ class Source:
         else:
             if self.event_field_name is not None:
                 raise ValueError('Longitudinal sources should not have an event field')
-
-
+    @property
+    def event_field_name(self):
+        if self._event_field_name is None:
+            raise AttributeError("No event field for this dataset")
+        return self._event_field_name
+    @property
+    def is_longitudinal(self):
+        return self.event_field_name is not None
 # per-field flags to decide what value to take from patient if there are many events with data
 class VisitPolicy(Enum):
     """For patients that will have many events with many of those events having the same data for a given field, the visit policy of that field determines which event the data will be extracted from.

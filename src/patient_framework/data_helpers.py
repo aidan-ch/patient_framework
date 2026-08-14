@@ -1,24 +1,27 @@
 """Default parsers when none is passed """
 
-from datetime import datetime
+import datetime
+from typing import Any
+
+__all__ = []
 
 _TRUTHY = {"1", "true","t", "yes", "y"}
 
 _FALSY = {"0", "false","f", "not","no", "n",""}
 
-def _coerce_date(value, format_str) -> datetime:
+def _coerce_date(value:str, format_str:str) -> datetime.datetime:
     """:param value: A string representing the date to parse
     :param format_str: expects a string like "%Y-%m-%d"
     :return: Date object
     """
     try:
-        out = datetime.strptime(value, format_str)
+        out = datetime.datetime.strptime(value, format_str)
     except ValueError as e:
         raise TypeError(f"Date string does not match format, or format is invalid: {e}")
 
     return out
 
-def _coerce_bool(value:bool|int|str) -> bool:
+def _coerce_bool(value:Any) -> bool:
     """:param value: If value is a str object, must be one of _TRUTHY, or _FALSY
     to be parsed to a boolean, else will raise TypeError."""
     if isinstance(value,str):
@@ -31,9 +34,13 @@ def _coerce_bool(value:bool|int|str) -> bool:
     elif isinstance(value, int):
         return bool(value)
 
-    raise TypeError(f"Cannot coerce {value!r} to a boolean")
+    try:
+        return bool(value)
+    except (ValueError, TypeError) as e:
+        raise TypeError(f"Could not coerce {value!r} into a boolean: {e}")
 
-def _coerce_str(value):
+
+def _coerce_str(value:Any)->str:
     if isinstance(value, str):
         return value
     try:
@@ -41,7 +48,7 @@ def _coerce_str(value):
     except TypeError as e:
         raise TypeError(f"Could not coerce {value!r} into a string: {e}")
 
-def _coerce_int(value):
+def _coerce_int(value:Any):
     if isinstance(value,int):
         return value
     try:
@@ -49,16 +56,15 @@ def _coerce_int(value):
     except (TypeError, ValueError) as e:
         raise TypeError(f"Could not coerce {value!r} into an integer: {e}")
 
-def _coerce_float(value):
+def _coerce_float(value:Any):
     if isinstance(value, float):
         return value
-
     try:
         return float(value)
     except (TypeError, ValueError) as e:
         raise TypeError(f"Could not coerce {value!r} into a float: {e}")
 
-def _coerce_none(value):
+def _coerce_none(value:type[None])->None:
     """Essentially just checks that this value is in fact None"""
     if value is not None:
         raise TypeError(f"{value!r} is of type {type(value)} and not {type(None)}")
